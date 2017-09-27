@@ -2,6 +2,7 @@ package com.yammer.metrics.core;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import com.google.common.base.Supplier;
 import com.tdunning.math.stats.AVLTreeDigest;
 import com.tdunning.math.stats.Centroid;
 import com.tdunning.math.stats.TDigest;
@@ -16,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Supplier;
 
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Iterables.getLast;
@@ -34,7 +34,8 @@ public class WavefrontHistogram extends Histogram implements Metric {
   private final static int MAX_BINS = 10;
   private final Supplier<Long> millis;
 
-  private final ConcurrentMap<Long, LinkedList<MinuteBin>> perThreadHistogramBins = new ConcurrentHashMap<>();
+  private final ConcurrentMap<Long, LinkedList<MinuteBin>> perThreadHistogramBins =
+          new ConcurrentHashMap<Long, LinkedList<MinuteBin>>();
 
   private WavefrontHistogram(TDigestSample sample, Supplier<Long> millis) {
     super(sample);
@@ -46,7 +47,12 @@ public class WavefrontHistogram extends Histogram implements Metric {
   }
 
   public static WavefrontHistogram get(MetricsRegistry registry, MetricName metricName) {
-    return get(registry, metricName, System::currentTimeMillis);
+    return get(registry, metricName, new Supplier<Long>() {
+      @Override
+      public Long get() {
+        return System.currentTimeMillis();
+      }
+    });
   }
 
   @VisibleForTesting
@@ -68,10 +74,15 @@ public class WavefrontHistogram extends Histogram implements Metric {
    * @return returns aggregated collection of all the bins prior to the current minute
    */
   public List<MinuteBin> bins(boolean clear) {
-    List<MinuteBin> result = new ArrayList<>();
+    List<MinuteBin> result = new ArrayList<MinuteBin>();
     final long cutoffMillis = minMillis();
-    perThreadHistogramBins.values().stream().flatMap(List::stream).
-        filter(i -> i.getMinMillis() < cutoffMillis).forEach(result::add);
+    for (LinkedList<MinuteBin> bins : perThreadHistogramBins.values()) {
+      for (MinuteBin bin : bins) {
+        if (bin.getMinMillis() < cutoffMillis) {
+          result.add(bin);
+        }
+      }
+    }
 
     if (clear) {
       clearPriorCurrentMinuteBin(cutoffMillis);
@@ -104,7 +115,7 @@ public class WavefrontHistogram extends Histogram implements Metric {
     long key = Thread.currentThread().getId();
     LinkedList<MinuteBin> bins = perThreadHistogramBins.get(key);
     if (bins == null) {
-      bins = new LinkedList<>();
+      bins = new LinkedList<MinuteBin>();
       LinkedList<MinuteBin> existing = perThreadHistogramBins.putIfAbsent(key, bins);
       if (existing != null) {
         bins = existing;
@@ -150,24 +161,45 @@ public class WavefrontHistogram extends Histogram implements Metric {
   @Override
   public double mean() {
     Collection<Centroid> centroids = snapshot().centroids();
-    return centroids.stream().mapToDouble(c -> (c.count() * c.mean()) / centroids.size()).sum();
+    double mean = 0;
+    int size = centroids.size();
+    for (Centroid c : centroids) {
+      mean += c.count() * c.mean() / size;
+    }
+    return mean;
   }
 
   public double min() {
     // This is a lie if the winning centroid's weight > 1
-    return perThreadHistogramBins.values().stream().flatMap(List::stream).map(b -> b.dist.centroids()).
-        mapToDouble(cs -> getFirst(cs, new Centroid(MAX_VALUE)).mean()).min().orElse(NaN);
+    double min = Double.MAX_VALUE;
+    for (LinkedList<MinuteBin> bins : perThreadHistogramBins.values()) {
+      for (MinuteBin bin : bins) {
+        min = Math.min(getFirst(bin.dist.centroids(), new Centroid(MAX_VALUE)).mean(), min);
+      }
+    }
+    return min;
   }
 
   public double max() {
     //This is a lie if the winning centroid's weight > 1
-    return perThreadHistogramBins.values().stream().flatMap(List::stream).map(b -> b.dist.centroids()).
-        mapToDouble(cs -> getLast(cs, new Centroid(MIN_VALUE)).mean()).max().orElse(NaN);
+    double max = Double.MIN_VALUE;
+    for (LinkedList<MinuteBin> bins : perThreadHistogramBins.values()) {
+      for (MinuteBin bin : bins) {
+        max = Math.max(getLast(bin.dist.centroids(), new Centroid(MIN_VALUE)).mean(), max);
+      }
+    }
+    return max;
   }
 
   @Override
   public long count() {
-    return perThreadHistogramBins.values().stream().flatMap(List::stream).mapToLong(bin -> bin.dist.size()).sum();
+    long count = 0;
+    for (LinkedList<MinuteBin> bins : perThreadHistogramBins.values()) {
+      for (MinuteBin bin : bins) {
+        count += bin.dist.size();
+      }
+    }
+    return count;
   }
 
   /**
@@ -204,7 +236,11 @@ public class WavefrontHistogram extends Histogram implements Metric {
   // TODO - how to ensure thread safety? do we care?
   private TDigest snapshot() {
     final TDigest snapshot = new AVLTreeDigest(ACCURACY);
-    perThreadHistogramBins.values().stream().flatMap(List::stream).forEach(bin -> snapshot.add(bin.dist));
+    for (LinkedList<MinuteBin> bins : perThreadHistogramBins.values()) {
+      for (MinuteBin bin : bins) {
+        snapshot.add(bin.dist);
+      }
+    }
     return snapshot;
   }
 

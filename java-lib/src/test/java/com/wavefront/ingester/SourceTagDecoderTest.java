@@ -25,7 +25,7 @@ public class SourceTagDecoderTest {
   @Test
   public void testSimpleSourceTagFormat() throws Exception {
     SourceTagDecoder decoder = new SourceTagDecoder();
-    List<ReportSourceTag> out = new ArrayList<>();
+    List<ReportSourceTag> out = new ArrayList<ReportSourceTag>();
     // Testwith 3sourceTags
     decoder.decodeSourceTagLine(String.format("@%s %s=%s %s=aSource sourceTag1 sourceTag2 " +
             "sourceTag3", SOURCE_TAG,
@@ -132,7 +132,7 @@ public class SourceTagDecoderTest {
   @Test
   public void testSimpleSourceDescriptions() throws Exception {
       SourceTagDecoder decoder = new SourceTagDecoder();
-      List<ReportSourceTag> out = new ArrayList<>();
+      List<ReportSourceTag> out = new ArrayList<ReportSourceTag>();
       // Testwith source description
       decoder.decodeSourceTagLine(String.format("@%s %s=%s %s= aSource description=desc",
           SOURCE_DESCRIPTION,

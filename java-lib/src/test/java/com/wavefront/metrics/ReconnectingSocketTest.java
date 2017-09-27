@@ -28,26 +28,29 @@ public class ReconnectingSocketTest {
     connects = 0;
     final ServerSocket serverSocket = new ServerSocket(0);
 
-    testServer = new Thread(() -> {
-      while (!Thread.currentThread().isInterrupted()) {
-        try {
-          Socket fromClient = serverSocket.accept();
-          connects++;
-          BufferedReader inFromClient = new BufferedReader(new InputStreamReader(fromClient.getInputStream()));
-          while (true) {
-            String input = inFromClient.readLine().trim().toLowerCase();
-            if (input.equals("give_fin")) {
-              fromClient.shutdownOutput();
-              break;  // Go to outer while loop, accept a new socket from serverSocket.
-            } else if (input.equals("give_rst")) {
-              fromClient.setSoLinger(true, 0);
-              fromClient.close();
-              break;  // Go to outer while loop, accept a new socket from serverSocket.
+    testServer = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        while (!Thread.currentThread().isInterrupted()) {
+          try {
+            Socket fromClient = serverSocket.accept();
+            connects++;
+            BufferedReader inFromClient = new BufferedReader(new InputStreamReader(fromClient.getInputStream()));
+            while (true) {
+              String input = inFromClient.readLine().trim().toLowerCase();
+              if (input.equals("give_fin")) {
+                fromClient.shutdownOutput();
+                break;  // Go to outer while loop, accept a new socket from serverSocket.
+              } else if (input.equals("give_rst")) {
+                fromClient.setSoLinger(true, 0);
+                fromClient.close();
+                break;  // Go to outer while loop, accept a new socket from serverSocket.
+              }
             }
+          } catch (IOException e) {
+            logger.log(Level.SEVERE, "Unexpected test error.", e);
+            // OK to go back to the top of the loop.
           }
-        } catch (IOException e) {
-          logger.log(Level.SEVERE, "Unexpected test error.", e);
-          // OK to go back to the top of the loop.
         }
       }
     });

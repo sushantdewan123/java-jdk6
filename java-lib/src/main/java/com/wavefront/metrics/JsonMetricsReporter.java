@@ -141,6 +141,7 @@ public class JsonMetricsReporter extends AbstractPollingReporter {
 
   public void reportMetrics() {
     TimerContext time = latency.time();
+    Response response = null;
     try {
       UriBuilder builder = UriBuilder.fromUri(new URI(
           https ? "https" : "http", sunnylabsHost, "/report/metrics", null));
@@ -171,15 +172,17 @@ public class JsonMetricsReporter extends AbstractPollingReporter {
             }
           }).
           build();
-      try (final Response response = client.newCall(request).execute()) {
-        logger.info("Metrics (JSON) reported: " + response.code());
-      }
+      response = client.newCall(request).execute();
+      logger.info("Metrics (JSON) reported: " + response.code());
       reports.inc();
     } catch (Throwable e) {
       logger.log(Level.WARNING, "Failed to report metrics (JSON)", e);
       errors.inc();
     } finally {
       time.stop();
+      if (response != null) {
+        response.close();
+      }
     }
   }
 }

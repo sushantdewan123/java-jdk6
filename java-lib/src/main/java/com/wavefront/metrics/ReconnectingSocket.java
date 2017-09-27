@@ -49,9 +49,9 @@ public class ReconnectingSocket {
     this.serverTerminated = false;
     this.socketFactory = socketFactory;
 
-    this.underlyingSocket = new AtomicReference<>(socketFactory.createSocket(host, port));
+    this.underlyingSocket = new AtomicReference<Socket>(socketFactory.createSocket(host, port));
     this.underlyingSocket.get().setSoTimeout(SERVER_READ_TIMEOUT_MILLIS);
-    this.socketOutputStream = new AtomicReference<>(new BufferedOutputStream(underlyingSocket.get().getOutputStream()));
+    this.socketOutputStream = new AtomicReference<BufferedOutputStream>(new BufferedOutputStream(underlyingSocket.get().getOutputStream()));
 
     this.pollingTimer = new Timer();
 

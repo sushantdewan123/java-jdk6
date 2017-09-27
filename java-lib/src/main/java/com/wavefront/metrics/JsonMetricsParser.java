@@ -84,9 +84,16 @@ public class JsonMetricsParser {
         while (binIt.hasNext()) {
           JsonNode bin = binIt.next();
           List<Integer> counts = newArrayList();
-          bin.get("counts").elements().forEachRemaining(v -> counts.add(v.intValue()));
+          Iterator<JsonNode> iter = bin.get("counts").elements();
+          while (iter.hasNext()) {
+            counts.add(iter.next().intValue());
+          }
+
           List<Double> means = newArrayList();
-          bin.get("means").elements().forEachRemaining(v -> means.add(v.doubleValue()));
+          iter = bin.get("means").elements();
+          while (iter.hasNext()) {
+            means.add(iter.next().doubleValue());
+          }
 
           points.add(makeHistogramPoint(
               table,

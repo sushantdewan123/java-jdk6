@@ -22,7 +22,7 @@ public class OpenTSDBDecoderTest {
     List<String> customSourceTags = new ArrayList<String>();
     customSourceTags.add("fqdn");
     OpenTSDBDecoder decoder = new OpenTSDBDecoder("localhost", customSourceTags);
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("put tsdb.vehicle.charge.battery_level 12345.678 93.123e3 host=vehicle_2554", out);
     ReportPoint point = out.get(0);
     assertEquals("dummy", point.getTable());
@@ -52,7 +52,7 @@ public class OpenTSDBDecoderTest {
     } catch (Exception ex) {
     }
 
-    out = new ArrayList<>();
+    out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("put tsdb.vehicle.charge.battery_level 12345.678 93.123e3", out);
     point = out.get(0);
     assertEquals("dummy", point.getTable());
@@ -62,7 +62,7 @@ public class OpenTSDBDecoderTest {
     assertEquals("localhost", point.getHost());
 
     // adaptive timestamp (13-char timestamp is millis).
-    out = new ArrayList<>();
+    out = new ArrayList<ReportPoint>();
     final long now = System.currentTimeMillis();
     decoder.decodeReportPoints("put tsdb.vehicle.charge.battery_level " + now
         + " 93.123e3", out);
@@ -73,7 +73,7 @@ public class OpenTSDBDecoderTest {
     assertEquals(now, point.getTimestamp().longValue());
     assertEquals("localhost", point.getHost());
 
-    out = new ArrayList<>();
+    out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("put tail.kernel.counter.errors 1447394143 0 fqdn=li250-160.members.linode.com  ", out);
     point = out.get(0);
     assertEquals("dummy", point.getTable());
@@ -82,7 +82,7 @@ public class OpenTSDBDecoderTest {
     assertEquals(1447394143000L, point.getTimestamp().longValue());
     assertEquals("li250-160.members.linode.com", point.getHost());
 
-    out = new ArrayList<>();
+    out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("put df.home-ubuntu-efs.df_complex.free 1447985300 9.22337186120781e+18 fqdn=ip-172-20-0-236.us-west-2.compute.internal  ", out);
     point = out.get(0);
     assertEquals("dummy", point.getTable());
@@ -94,10 +94,10 @@ public class OpenTSDBDecoderTest {
 
   @Test
   public void testOpenTSDBCharacters() {
-    List<String> customSourceTags = new ArrayList<>();
+    List<String> customSourceTags = new ArrayList<String>();
     customSourceTags.add("fqdn");
     OpenTSDBDecoder decoder = new OpenTSDBDecoder("localhost", customSourceTags);
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("put tsdb.vehicle.charge.battery_level 12345.678 93.123e3 host=/vehicle_2554-test/GOOD some_tag=/vehicle_2554-test/BAD", out);
     ReportPoint point = out.get(0);
     assertEquals("dummy", point.getTable());

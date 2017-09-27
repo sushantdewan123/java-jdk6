@@ -34,18 +34,18 @@ import javax.annotation.Nullable;
 public class MetricMangler {
 
   // Fields to extract and assemble, in order, as the host name
-  private final List<Integer> hostIndices = new ArrayList<>();
+  private final List<Integer> hostIndices = new ArrayList<Integer>();
   private int maxField = 0;
 
   // Lookup set for which indices are hostname related
-  private final Set<Integer> hostIndexSet = new HashSet<>();
+  private final Set<Integer> hostIndexSet = new HashSet<Integer>();
 
   // Characters which should be interpreted as dots
   @Nullable
   private final String delimiters;
 
   // Fields to remove
-  private final Set<Integer> removeIndexSet = new HashSet<>();
+  private final Set<Integer> removeIndexSet = new HashSet<Integer>();
 
   /**
    * Constructor.
