@@ -7,7 +7,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
-import com.google.common.base.Supplier;
 import com.tdunning.math.stats.Centroid;
 import com.wavefront.common.MetricsToTimeseries;
 import com.wavefront.common.Pair;
@@ -172,13 +171,6 @@ public abstract class JsonMetricsGenerator {
     }
   }
 
-  private static void mergeSupplierMapIntoJson(JsonGenerator jsonGenerator, Map<String, Supplier<Double>> metrics)
-      throws IOException {
-    for (Map.Entry<String, Supplier<Double>> entry : metrics.entrySet()) {
-      jsonGenerator.writeNumberField(entry.getKey(), entry.getValue().get());
-    }
-  }
-
   private static void writeVmMetrics(JsonGenerator json, @Nullable Map<String, String> pointTags) throws IOException {
     json.writeFieldName("jvm");  // jvm
     if (pointTags != null) {
@@ -199,21 +191,11 @@ public abstract class JsonMetricsGenerator {
       json.writeFieldName("memory");  // jvm.memory
       json.writeStartObject();
       {
-        mergeSupplierMapIntoJson(json, MetricsToTimeseries.memoryMetrics(new Supplier<VirtualMachineMetrics>() {
-          @Override
-          public VirtualMachineMetrics get() {
-            return vm;
-          }
-        }));
+        mergeMapIntoJson(json, MetricsToTimeseries.memoryMetrics(vm));
         json.writeFieldName("memory_pool_usages");  // jvm.memory.memory_pool_usages
         json.writeStartObject();
         {
-          mergeSupplierMapIntoJson(json, MetricsToTimeseries.memoryPoolsMetrics(new Supplier<VirtualMachineMetrics>() {
-            @Override
-            public VirtualMachineMetrics get() {
-              return vm;
-            }
-          }));
+          mergeMapIntoJson(json, MetricsToTimeseries.memoryPoolsMetrics(vm));
         }
         json.writeEndObject();
       }
@@ -227,68 +209,39 @@ public abstract class JsonMetricsGenerator {
           json.writeFieldName("direct");  // jvm.buffers.direct
           json.writeStartObject();
           {
-            mergeSupplierMapIntoJson(json, MetricsToTimeseries.buffersMetrics(
-                    new Supplier<VirtualMachineMetrics.BufferPoolStats>() {
-              @Override
-              public VirtualMachineMetrics.BufferPoolStats get() {
-                return bufferPoolStats.get("direct");
-              }
-            }));
+            mergeMapIntoJson(json, MetricsToTimeseries.buffersMetrics(bufferPoolStats.get("direct")));
           }
           json.writeEndObject();
 
           json.writeFieldName("mapped");  // jvm.buffers.mapped
           json.writeStartObject();
           {
-            mergeSupplierMapIntoJson(json, MetricsToTimeseries.buffersMetrics(
-                    new Supplier<VirtualMachineMetrics.BufferPoolStats>() {
-              @Override
-              public VirtualMachineMetrics.BufferPoolStats get() {
-                return bufferPoolStats.get("mapped");
-              }
-            }));
+            mergeMapIntoJson(json, MetricsToTimeseries.buffersMetrics(bufferPoolStats.get("mapped")));
           }
           json.writeEndObject();
         }
         json.writeEndObject();
       }
 
-      // jvm.<vm_metric>
-      mergeSupplierMapIntoJson(json, MetricsToTimeseries.vmMetrics(new Supplier<VirtualMachineMetrics>() {
-        @Override
-        public VirtualMachineMetrics get() {
-          return vm;
-        }
-      }));
+      mergeMapIntoJson(json, MetricsToTimeseries.vmMetrics(vm));  // jvm.<vm_metric>
       json.writeNumberField("current_time", clock.time());
 
       json.writeFieldName("thread-states");  // jvm.thread-states
       json.writeStartObject();
       {
-        mergeSupplierMapIntoJson(json, MetricsToTimeseries.threadStateMetrics(new Supplier<VirtualMachineMetrics>() {
-          @Override
-          public VirtualMachineMetrics get() {
-            return vm;
-          }
-        }));
+        mergeMapIntoJson(json, MetricsToTimeseries.threadStateMetrics(vm));
       }
       json.writeEndObject();
 
       json.writeFieldName("garbage-collectors");  // jvm.garbage-collectors
       json.writeStartObject();
       {
-        for (final Map.Entry<String, VirtualMachineMetrics.GarbageCollectorStats> entry : vm.garbageCollectors()
+        for (Map.Entry<String, VirtualMachineMetrics.GarbageCollectorStats> entry : vm.garbageCollectors()
             .entrySet()) {
           json.writeFieldName(entry.getKey());  // jvm.garbage-collectors.<gc_id>
           json.writeStartObject();
           {
-            mergeSupplierMapIntoJson(json, MetricsToTimeseries.gcMetrics(
-                    new Supplier<VirtualMachineMetrics.GarbageCollectorStats>() {
-              @Override
-              public VirtualMachineMetrics.GarbageCollectorStats get() {
-                return entry.getValue();
-              }
-            }));
+            mergeMapIntoJson(json, MetricsToTimeseries.gcMetrics(entry.getValue()));
           }
           json.writeEndObject();
         }

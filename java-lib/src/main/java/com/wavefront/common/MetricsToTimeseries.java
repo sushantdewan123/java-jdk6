@@ -1,6 +1,5 @@
 package com.wavefront.common;
 
-import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 
 import com.yammer.metrics.core.Metered;
@@ -48,171 +47,59 @@ public abstract class MetricsToTimeseries {
         .build();
   }
 
-  public static Map<String, Supplier<Double>> memoryMetrics(Supplier<VirtualMachineMetrics> supplier) {
-    final VirtualMachineMetrics vm = supplier.get();
-    return ImmutableMap.<String, Supplier<Double>>builder()
-            .put("totalInit", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return vm.totalInit();
-              }
-            })
-            .put("totalUsed", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return vm.totalUsed();
-              }
-            })
-            .put("totalMax", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return vm.totalMax();
-              }
-            })
-            .put("totalCommitted", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return vm.totalCommitted();
-              }
-            })
-            .put("heapInit", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return vm.heapInit();
-              }
-            })
-            .put("heapUsed", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return vm.heapUsed();
-              }
-            })
-            .put("heapMax", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return vm.heapMax();
-              }
-            })
-            .put("heapCommitted", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return vm.heapCommitted();
-              }
-            })
-            .put("heap_usage", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return vm.heapUsage();
-              }
-            })
-            .put("non_heap_usage", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return vm.nonHeapUsage();
-              }
-            })
-            .build();
+  public static Map<String, Double> memoryMetrics(VirtualMachineMetrics vm) {
+    return ImmutableMap.<String, Double>builder()
+        .put("totalInit", vm.totalInit())
+        .put("totalUsed", vm.totalUsed())
+        .put("totalMax", vm.totalMax())
+        .put("totalCommitted", vm.totalCommitted())
+        .put("heapInit", vm.heapInit())
+        .put("heapUsed", vm.heapUsed())
+        .put("heapMax", vm.heapMax())
+        .put("heapCommitted", vm.heapCommitted())
+        .put("heap_usage", vm.heapUsage())
+        .put("non_heap_usage", vm.nonHeapUsage())
+        .build();
   }
 
-  public static Map<String, Supplier<Double>> memoryPoolsMetrics(Supplier<VirtualMachineMetrics> supplier) {
-    VirtualMachineMetrics vm = supplier.get();
-    ImmutableMap.Builder<String, Supplier<Double>> builder = ImmutableMap.builder();
-    for (final Map.Entry<String, Double> pool : vm.memoryPoolUsage().entrySet()) {
-      builder.put(pool.getKey(), new Supplier<Double>() {
-        @Override
-        public Double get() {
-          return pool.getValue();
-        }
-      });
+  public static Map<String, Double> memoryPoolsMetrics(VirtualMachineMetrics vm) {
+    ImmutableMap.Builder<String, Double> builder = ImmutableMap.builder();
+    for (Map.Entry<String, Double> pool : vm.memoryPoolUsage().entrySet()) {
+      builder.put(pool.getKey(), pool.getValue());
     }
     return builder.build();
   }
 
-  public static Map<String, Supplier<Double>> buffersMetrics(Supplier<VirtualMachineMetrics.BufferPoolStats> supplier) {
-    final VirtualMachineMetrics.BufferPoolStats bps = supplier.get();
-    return ImmutableMap.<String, Supplier<Double>>builder()
-            .put("count", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return (double) bps.getCount();
-              }
-            })
-            .put("memoryUsed", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return (double) bps.getMemoryUsed();
-              }
-            })
-            .put("totalCapacity", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return (double) bps.getTotalCapacity();
-              }
-            })
-            .build();
+  public static Map<String, Double> buffersMetrics(VirtualMachineMetrics.BufferPoolStats bps) {
+    return ImmutableMap.<String, Double>builder()
+        .put("count", (double) bps.getCount())
+        .put("memoryUsed", (double) bps.getMemoryUsed())
+        .put("totalCapacity", (double) bps.getTotalCapacity())
+        .build();
   }
 
-  public static Map<String, Supplier<Double>> vmMetrics(Supplier<VirtualMachineMetrics> supplier) {
-    final VirtualMachineMetrics vm = supplier.get();
-    return ImmutableMap.<String, Supplier<Double>>builder()
-            .put("daemon_thread_count", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return (double) vm.daemonThreadCount();
-              }
-            })
-            .put("thread_count", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return (double) vm.threadCount();
-              }
-            })
-            .put("uptime", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return (double) vm.uptime();
-              }
-            })
-            .put("fd_usage", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return vm.fileDescriptorUsage();
-              }
-            })
-            .build();
+  public static Map<String, Double> vmMetrics(VirtualMachineMetrics vm) {
+    return ImmutableMap.<String, Double>builder()
+        .put("daemon_thread_count", (double) vm.daemonThreadCount())
+        .put("thread_count", (double) vm.threadCount())
+        .put("uptime", (double) vm.uptime())
+        .put("fd_usage", vm.fileDescriptorUsage())
+        .build();
   }
 
-  public static Map<String, Supplier<Double>> threadStateMetrics(Supplier<VirtualMachineMetrics> supplier) {
-    VirtualMachineMetrics vm = supplier.get();
-    ImmutableMap.Builder<String, Supplier<Double>> builder = ImmutableMap.builder();
-    for (final Map.Entry<Thread.State, Double> entry : vm.threadStatePercentages().entrySet()) {
-      builder.put(entry.getKey().toString().toLowerCase(), new Supplier<Double>() {
-        @Override
-        public Double get() {
-          return entry.getValue();
-        }
-      });
+  public static Map<String, Double> threadStateMetrics(VirtualMachineMetrics vm) {
+    ImmutableMap.Builder<String, Double> builder = ImmutableMap.builder();
+    for (Map.Entry<Thread.State, Double> entry : vm.threadStatePercentages().entrySet()) {
+      builder.put(entry.getKey().toString().toLowerCase(), entry.getValue());
     }
     return builder.build();
   }
 
-  public static Map<String, Supplier<Double>> gcMetrics(
-      Supplier<VirtualMachineMetrics.GarbageCollectorStats> supplier) {
-    final VirtualMachineMetrics.GarbageCollectorStats gcs = supplier.get();
-    return ImmutableMap.<String, Supplier<Double>>builder()
-            .put("runs", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return (double) gcs.getRuns();
-              }
-            })
-            .put("time", new Supplier<Double>() {
-              @Override
-              public Double get() {
-                return (double) gcs.getTime(TimeUnit.MILLISECONDS);
-              }
-            })
-            .build();
+  public static Map<String, Double> gcMetrics(VirtualMachineMetrics.GarbageCollectorStats gcs) {
+    return ImmutableMap.<String, Double>builder()
+        .put("runs", (double) gcs.getRuns())
+        .put("time", (double) gcs.getTime(TimeUnit.MILLISECONDS))
+        .build();
   }
 
 
