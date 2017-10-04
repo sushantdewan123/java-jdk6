@@ -24,7 +24,7 @@ public class GraphiteDecoderTest {
   @Test
   public void testDoubleFormat() throws Exception {
     GraphiteDecoder decoder = new GraphiteDecoder("localhost", emptyCustomSourceTags);
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("tsdb.vehicle.charge.battery_level 93.123e3 host=vehicle_2554", out);
     ReportPoint point = out.get(0);
     assertEquals("tsdb", point.getTable());
@@ -32,7 +32,7 @@ public class GraphiteDecoderTest {
     assertEquals(93123.0, point.getValue());
     assertEquals("vehicle_2554", point.getHost());
 
-    out = new ArrayList<>();
+    out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("tsdb.vehicle.charge.battery_level -93.123e3 host=vehicle_2554", out);
     point = out.get(0);
     assertEquals("tsdb", point.getTable());
@@ -40,7 +40,7 @@ public class GraphiteDecoderTest {
     assertEquals(-93123.0, point.getValue());
     assertEquals("vehicle_2554", point.getHost());
 
-    out = new ArrayList<>();
+    out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("tsdb.vehicle.charge.battery_level 93.123e-3 host=vehicle_2554", out);
     point = out.get(0);
     assertEquals("tsdb", point.getTable());
@@ -48,7 +48,7 @@ public class GraphiteDecoderTest {
     assertEquals(0.093123, point.getValue());
     assertEquals("vehicle_2554", point.getHost());
 
-    out = new ArrayList<>();
+    out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("tsdb.vehicle.charge.battery_level -93.123e-3 host=vehicle_2554", out);
     point = out.get(0);
     assertEquals("tsdb", point.getTable());
@@ -96,7 +96,7 @@ public class GraphiteDecoderTest {
   @Test
   public void testTagVWithDigitAtBeginning() throws Exception {
     GraphiteDecoder decoder = new GraphiteDecoder("localhost", emptyCustomSourceTags);
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("tsdb.vehicle.charge.battery_level 93 host=vehicle_2554 version=1_0", out);
     ReportPoint point = out.get(0);
     assertEquals("tsdb", point.getTable());
@@ -109,7 +109,7 @@ public class GraphiteDecoderTest {
   @Test
   public void testFormat() throws Exception {
     GraphiteDecoder decoder = new GraphiteDecoder("localhost", emptyCustomSourceTags);
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("tsdb.vehicle.charge.battery_level 93 host=vehicle_2554", out);
     ReportPoint point = out.get(0);
     assertEquals("tsdb", point.getTable());
@@ -121,7 +121,7 @@ public class GraphiteDecoderTest {
   @Test
   public void testIpV4Host() throws Exception {
     GraphiteDecoder decoder = new GraphiteDecoder("localhost", emptyCustomSourceTags);
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("tsdb.vehicle.charge.battery_level 93 host=10.0.0.1", out);
     ReportPoint point = out.get(0);
     assertEquals("tsdb", point.getTable());
@@ -133,7 +133,7 @@ public class GraphiteDecoderTest {
   @Test
   public void testIpV6Host() throws Exception {
     GraphiteDecoder decoder = new GraphiteDecoder("localhost", emptyCustomSourceTags);
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("tsdb.vehicle.charge.battery_level 93 host=2001:db8:3333:4444:5555:6666:7777:8888", out);
     ReportPoint point = out.get(0);
     assertEquals("tsdb", point.getTable());
@@ -145,7 +145,7 @@ public class GraphiteDecoderTest {
   @Test
   public void testFormatWithTimestamp() throws Exception {
     GraphiteDecoder decoder = new GraphiteDecoder("localhost", emptyCustomSourceTags);
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("tsdb.vehicle.charge.battery_level 93 1234567890.246 host=vehicle_2554", out);
     ReportPoint point = out.get(0);
     assertEquals("tsdb", point.getTable());
@@ -158,7 +158,7 @@ public class GraphiteDecoderTest {
   @Test
   public void testFormatWithNoTags() throws Exception {
     GraphiteDecoder decoder = new GraphiteDecoder("localhost", emptyCustomSourceTags);
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("tsdb.vehicle.charge.battery_level 93", out);
     ReportPoint point = out.get(0);
     assertEquals("tsdb", point.getTable());
@@ -169,7 +169,7 @@ public class GraphiteDecoderTest {
   @Test
   public void testFormatWithNoTagsAndTimestamp() throws Exception {
     GraphiteDecoder decoder = new GraphiteDecoder("localhost", emptyCustomSourceTags);
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
     decoder.decodeReportPoints("tsdb.vehicle.charge.battery_level 93 1234567890.246", out);
     ReportPoint point = out.get(0);
     assertEquals("tsdb", point.getTable());
@@ -399,7 +399,7 @@ public class GraphiteDecoderTest {
     assertEquals("ide0_0", point.getAnnotations().get("instance"));
     assertEquals(4.0, point.getValue());
 
-    out = new ArrayList<>();
+    out = new ArrayList<ReportPoint>();
     try {
       decoder.decodeReportPoints("test.metric 1 host=test test=\"", out, "customer");
       fail("should throw");
@@ -449,12 +449,12 @@ public class GraphiteDecoderTest {
     GraphiteDecoder decoder = new GraphiteDecoder("localhost", emptyCustomSourceTags);
     int ITERATIONS = 1000000;
     for (int i = 0; i < ITERATIONS / 1000; i++) {
-      List<ReportPoint> out = new ArrayList<>();
+      List<ReportPoint> out = new ArrayList<ReportPoint>();
       decoder.decodeReportPoints("tsdb.vehicle.charge.battery_level 93 123456 highcardinalitytag5=vehicle_2554", out);
     }
     long start = System.currentTimeMillis();
     for (int i = 0; i < ITERATIONS; i++) {
-      List<ReportPoint> out = new ArrayList<>();
+      List<ReportPoint> out = new ArrayList<ReportPoint>();
       decoder.decodeReportPoints("tsdb.vehicle.charge.battery_level 93 123456 highcardinalitytag5=vehicle_2554", out);
     }
     double end = System.currentTimeMillis();

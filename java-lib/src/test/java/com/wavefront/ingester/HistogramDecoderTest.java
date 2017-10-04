@@ -21,7 +21,7 @@ public class HistogramDecoderTest {
   @Test
   public void testBasicMessage() {
     HistogramDecoder decoder = new HistogramDecoder();
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
 
     decoder.decodeReportPoints("!M 1471988653 #3 123.237 TestMetric source=Test key=value", out, "customer");
 
@@ -53,7 +53,7 @@ public class HistogramDecoderTest {
   @Test
   public void testHourBin() {
     HistogramDecoder decoder = new HistogramDecoder();
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
 
     decoder.decodeReportPoints("!H 1471988653 #3 123.237 TestMetric source=Test key=value", out, "customer");
 
@@ -72,7 +72,7 @@ public class HistogramDecoderTest {
   @Test
   public void testDayBin() {
     HistogramDecoder decoder = new HistogramDecoder();
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
 
     decoder.decodeReportPoints("!D 1471988653 #3 123.237 TestMetric source=Test key=value", out, "customer");
 
@@ -91,7 +91,7 @@ public class HistogramDecoderTest {
   @Test
   public void testTagKey() {
     HistogramDecoder decoder = new HistogramDecoder();
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
 
     decoder.decodeReportPoints("!M 1471988653 #3 123.237 TestMetric source=Test tag=value", out, "customer");
 
@@ -105,7 +105,7 @@ public class HistogramDecoderTest {
   @Test
   public void testMultipleBuckets() {
     HistogramDecoder decoder = new HistogramDecoder();
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
 
     decoder.decodeReportPoints("!M 1471988653 #1 3.1416 #1 2.7183 TestMetric", out, "customer");
 
@@ -128,7 +128,7 @@ public class HistogramDecoderTest {
   @Test
   public void testNegativeMean() {
     HistogramDecoder decoder = new HistogramDecoder();
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
 
     decoder.decodeReportPoints("!M 1471988653 #1 -3.1416 TestMetric", out, "customer");
 
@@ -151,7 +151,7 @@ public class HistogramDecoderTest {
   @Test(expected = RuntimeException.class)
   public void testMissingBin() {
     HistogramDecoder decoder = new HistogramDecoder();
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
 
     decoder.decodeReportPoints("1471988653 #3 123.237 TestMetric source=Test tag=value", out, "customer");
   }
@@ -160,7 +160,7 @@ public class HistogramDecoderTest {
   public void testMissingTimestamp() {
     //Note - missingTimestamp to port 40,000 is no longer invalid - see MONIT-6430 for more details
     HistogramDecoder decoder = new HistogramDecoder();
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
 
     decoder.decodeReportPoints("!M #3 123.237 TestMetric source=Test tag=value", out, "customer");
 
@@ -197,7 +197,7 @@ public class HistogramDecoderTest {
   @Test(expected = RuntimeException.class)
   public void testMissingCentroids() {
     HistogramDecoder decoder = new HistogramDecoder();
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
 
     decoder.decodeReportPoints("!M 1471988653 TestMetric source=Test tag=value", out, "customer");
   }
@@ -207,7 +207,7 @@ public class HistogramDecoderTest {
     //Note - missingTimestamp to port 40,000 is no longer invalid - see MONIT-6430 for more details
     // as a side-effect of that, this test no longer fails!!!
     HistogramDecoder decoder = new HistogramDecoder();
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
 
     decoder.decodeReportPoints("!M #3 1471988653 TestMetric source=Test tag=value", out, "customer");
 
@@ -244,7 +244,7 @@ public class HistogramDecoderTest {
   @Test(expected = RuntimeException.class)
   public void testMissingCount() {
     HistogramDecoder decoder = new HistogramDecoder();
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
 
     decoder.decodeReportPoints("!M 3.412 1471988653 TestMetric source=Test tag=value", out, "customer");
   }
@@ -252,7 +252,7 @@ public class HistogramDecoderTest {
   @Test(expected = RuntimeException.class)
   public void testZeroCount() {
     HistogramDecoder decoder = new HistogramDecoder();
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
 
     decoder.decodeReportPoints("!M #0 3.412 1471988653 TestMetric source=Test tag=value", out, "customer");
   }
@@ -260,7 +260,7 @@ public class HistogramDecoderTest {
   @Test(expected = RuntimeException.class)
   public void testMissingMetric() {
     HistogramDecoder decoder = new HistogramDecoder();
-    List<ReportPoint> out = new ArrayList<>();
+    List<ReportPoint> out = new ArrayList<ReportPoint>();
 
     decoder.decodeReportPoints("1471988653 #3 123.237 source=Test tag=value", out, "customer");
   }

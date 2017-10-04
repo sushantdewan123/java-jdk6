@@ -86,12 +86,12 @@ public class GraphiteHostAnnotatorTest {
     int ITERATIONS = 1000000;
 
     for (int i = 0; i < ITERATIONS / 1000; i++) {
-      List<Object> out = new ArrayList<>();
+      List<Object> out = new ArrayList<Object>();
       handler.decode(null, "tsdb.vehicle.charge.battery_level 93 123456 host=vehicle_2554", out);
     }
     long start = System.currentTimeMillis();
     for (int i = 0; i < ITERATIONS; i++) {
-      List<Object> out = new ArrayList<>();
+      List<Object> out = new ArrayList<Object>();
       handler.decode(null, "tsdb.vehicle.charge.battery_level 93 123456 host=vehicle_2554", out);
     }
     double end = System.currentTimeMillis();

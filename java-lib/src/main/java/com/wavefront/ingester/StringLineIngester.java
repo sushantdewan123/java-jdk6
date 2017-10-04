@@ -43,9 +43,9 @@ public class StringLineIngester extends TcpIngester {
   private static List<Function<Channel, ChannelHandler>> createDecoderList(@Nullable final List<Function<Channel, ChannelHandler>> decoders) {
     final List<Function<Channel, ChannelHandler>> copy;
     if (decoders == null) {
-      copy = new ArrayList<>();
+      copy = new ArrayList<Function<Channel, ChannelHandler>>();
     } else {
-      copy = new ArrayList<>(decoders);
+      copy = new ArrayList<Function<Channel, ChannelHandler>>(decoders);
     }
     copy.add(0, new Function<Channel, ChannelHandler>() {
       @Override
@@ -72,7 +72,7 @@ public class StringLineIngester extends TcpIngester {
   }
 
   public static List<Integer> indexPushData(String pushData) {
-    List<Integer> index = new ArrayList<>();
+    List<Integer> index = new ArrayList<Integer>();
     index.add(0);
     int lastIndex = pushData.indexOf(PUSH_DATA_DELIMETER);
     final int delimiterLength = PUSH_DATA_DELIMETER.length();

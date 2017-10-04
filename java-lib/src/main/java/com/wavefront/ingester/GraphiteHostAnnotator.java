@@ -14,13 +14,15 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 public class GraphiteHostAnnotator extends MessageToMessageDecoder<String> {
 
   private final String hostName;
-  private final List<String> sourceTags = new ArrayList<>();
+  private final List<String> sourceTags = new ArrayList<String>();
 
   public GraphiteHostAnnotator(String hostName, final List<String> customSourceTags) {
     this.hostName = hostName;
     this.sourceTags.add("source=");
     this.sourceTags.add("host=");
-    this.sourceTags.addAll(customSourceTags.stream().map(customTag -> customTag + "=").collect(Collectors.toList()));
+    for (String customSourceTag : customSourceTags) {
+      this.sourceTags.add(customSourceTag + "=");
+    }
   }
 
   // Decode from a possibly host-annotated graphite string to a definitely host-annotated graphite string.

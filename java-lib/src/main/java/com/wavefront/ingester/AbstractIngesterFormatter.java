@@ -90,8 +90,12 @@ public abstract class AbstractIngesterFormatter<T> {
     // we don't expect the graphite format to change anytime soon.
 
     // filter all EOF tokens first.
-    Queue<Token> queue = tokens.stream().filter(t -> t.getType() != Lexer.EOF).collect(
-        Collectors.toCollection(ArrayDeque::new));
+    Queue<Token> queue = new ArrayDeque<Token>();
+    for (Token token : tokens) {
+      if (token.getType() != Lexer.EOF) {
+        queue.add(token);
+      }
+    }
     return queue;
   }
 
@@ -418,18 +422,14 @@ public abstract class AbstractIngesterFormatter<T> {
       int durationMillis = 0;
       String binType = tokenQueue.poll().getText();
 
-      switch (binType) {
-        case "!M":
-          durationMillis = (int) DateUtils.MILLIS_PER_MINUTE;
-          break;
-        case "!H":
-          durationMillis = (int) DateUtils.MILLIS_PER_HOUR;
-          break;
-        case "!D":
-          durationMillis = (int) DateUtils.MILLIS_PER_DAY;
-          break;
-        default:
-          throw new RuntimeException("Unknown BinType " + binType);
+      if (binType.equals("!M")) {
+        durationMillis = (int) DateUtils.MILLIS_PER_MINUTE;
+      } else if (binType.equals("!H")) {
+        durationMillis = (int) DateUtils.MILLIS_PER_HOUR;
+      } else if (binType.equals("!D")) {
+        durationMillis = (int) DateUtils.MILLIS_PER_DAY;
+      } else {
+        throw new RuntimeException("Unknown BinType " + binType);
       }
 
       Histogram h = firstNonNull((Histogram) point.getValue(), new Histogram());
@@ -468,11 +468,11 @@ public abstract class AbstractIngesterFormatter<T> {
       double mean = parseValue(tokenQueue, "centroid mean");
 
       Histogram h = firstNonNull((Histogram) point.getValue(), new Histogram());
-      List<Double> bins = firstNonNull(h.getBins(), new ArrayList<>());
+      List<Double> bins = firstNonNull(h.getBins(), new ArrayList<Double>());
       bins.add(mean);
       h.setBins(bins);
 
-      List<Integer> counts = firstNonNull(h.getCounts(), new ArrayList<>());
+      List<Integer> counts = firstNonNull(h.getCounts(), new ArrayList<Integer>());
       counts.add(count);
       h.setCounts(counts);
       point.setValue(h);
@@ -743,18 +743,14 @@ public abstract class AbstractIngesterFormatter<T> {
       String tagv = getLiteral(queue);
       if (tagv.length() == 0) throw new RuntimeException("Invalid tag value for: " + tagk);
 
-      switch (tagk) {
-        case SourceTagIngesterFormatter.ACTION:
-          sourceTag.setAction(tagv);
-          break;
-        case SourceTagIngesterFormatter.SOURCE:
-          sourceTag.setSource(tagv);
-          break;
-        case SourceTagIngesterFormatter.DESCRIPTION:
-          sourceTag.setDescription(tagv);
-          break;
-        default:
-          throw new RuntimeException("Unknown tag key = " + tagk + " specified.");
+      if (tagk.equals(SourceTagIngesterFormatter.ACTION)) {
+        sourceTag.setAction(tagv);
+      } else if (tagk.equals(SourceTagIngesterFormatter.SOURCE)) {
+        sourceTag.setSource(tagv);
+      } else if (tagk.equals(SourceTagIngesterFormatter.DESCRIPTION)) {
+        sourceTag.setDescription(tagv);
+      } else {
+        throw new RuntimeException("Unknown tag key = " + tagk + " specified.");
       }
     }
   }

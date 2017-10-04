@@ -1,18 +1,17 @@
 package com.wavefront.metrics;
 
+import com.google.common.base.Function;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 
 import com.wavefront.common.Pair;
-import com.yammer.metrics.core.Counter;
-import com.yammer.metrics.core.Histogram;
-import com.yammer.metrics.core.MetricName;
-import com.yammer.metrics.core.MetricsRegistry;
-import com.yammer.metrics.core.WavefrontHistogram;
+import com.yammer.metrics.core.*;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
@@ -93,14 +92,25 @@ public class JsonMetricsGeneratorTest {
     Counter counter = testRegistry.newCounter(new MetricName("test", "foo", "bar"));
     counter.inc();
     counter.inc();
-    String json = generate(false, false, false, metricNameMetricPair -> {
-      assertThat(metricNameMetricPair._1).isEquivalentAccordingToCompareTo(new MetricName("test", "foo", "bar"));
-      assertThat(metricNameMetricPair._2).isInstanceOf(Counter.class);
-      assertThat(((Counter)metricNameMetricPair._2).count()).isEqualTo(2);
-      return new Pair<>(new MetricName("test", "baz", "qux"), metricNameMetricPair._2);
+    String json = generate(false, false, false, new MetricTranslator() {
+      @Nullable
+      @Override
+      public Pair<MetricName, Metric> apply(@Nullable Pair<MetricName, Metric> metricNameMetricPair) {
+        assertThat(metricNameMetricPair._1).isEquivalentAccordingToCompareTo(new MetricName("test", "foo", "bar"));
+        assertThat(metricNameMetricPair._2).isInstanceOf(Counter.class);
+        assertThat(((Counter)metricNameMetricPair._2).count()).isEqualTo(2);
+        return new Pair<MetricName, Metric>(new MetricName("test", "baz", "qux"), metricNameMetricPair._2);
+      }
     });
     assertThat(json).isEqualTo("{\"test.qux\":2}");
-    json = generate(false, false, false, metricNameMetricPair -> null);
+    json = generate(false, false, false, new MetricTranslator() {
+
+      @Nullable
+      @Override
+      public Pair<MetricName, Metric> apply(@Nullable Pair<MetricName, Metric> input) {
+        return null;
+      }
+    });
     assertThat(json).isEqualTo("{}");
   }
 
@@ -119,7 +129,12 @@ public class JsonMetricsGeneratorTest {
 
   @Test
   public void testWavefrontHistogram() throws IOException {
-    Histogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), time::get);
+    Histogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), new Supplier<Long>() {
+      @Override
+      public Long get() {
+        return time.get();
+      }
+    });
 
     wh.update(10);
     wh.update(100);
@@ -136,7 +151,12 @@ public class JsonMetricsGeneratorTest {
 
   @Test
   public void testWavefrontHistogramClear() throws IOException {
-    Histogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), time::get);
+    Histogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), new Supplier<Long>() {
+      @Override
+      public Long get() {
+        return time.get();
+      }
+    });
     wh.update(10);
 
     // Simulate the 1 minute has passed and we are ready to flush the histogram
@@ -158,7 +178,12 @@ public class JsonMetricsGeneratorTest {
 
   @Test
   public void testWavefrontHistogramNoClear() throws IOException {
-    Histogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), time::get);
+    Histogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), new Supplier<Long>() {
+      @Override
+      public Long get() {
+        return time.get();
+      }
+    });
 
     wh.update(10);
     generate(false, false, false, null);
@@ -175,7 +200,12 @@ public class JsonMetricsGeneratorTest {
 
   @Test
   public void testWavefrontHistogramSpanMultipleMinutes() throws IOException {
-    Histogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), time::get);
+    Histogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), new Supplier<Long>() {
+      @Override
+      public Long get() {
+        return time.get();
+      }
+    });
 
     wh.update(10);
     wh.update(100);
@@ -193,7 +223,12 @@ public class JsonMetricsGeneratorTest {
 
   @Test
   public void testWavefrontHistogramPrunesOldBins() throws IOException {
-    Histogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), time::get);
+    Histogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), new Supplier<Long>() {
+      @Override
+      public Long get() {
+        return time.get();
+      }
+    });
     //1
     wh.update(10);
     //2
@@ -237,7 +272,12 @@ public class JsonMetricsGeneratorTest {
 
   @Test
   public void testWavefrontHistogramBulkUpdate() throws IOException {
-    WavefrontHistogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), time::get);
+    WavefrontHistogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), new Supplier<Long>() {
+      @Override
+      public Long get() {
+        return time.get();
+      }
+    });
 
     wh.bulkUpdate(ImmutableList.of(15d, 30d, 45d), ImmutableList.of(1, 5, 1));
 
@@ -252,7 +292,12 @@ public class JsonMetricsGeneratorTest {
 
   @Test
   public void testWavefrontHistogramBulkUpdateHandlesMismatchedLengths() throws IOException {
-    WavefrontHistogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), time::get);
+    WavefrontHistogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), new Supplier<Long>() {
+      @Override
+      public Long get() {
+        return time.get();
+      }
+    });
 
     wh.bulkUpdate(ImmutableList.of(15d, 30d, 45d, 100d), ImmutableList.of(1, 5, 1));
     wh.bulkUpdate(ImmutableList.of(1d, 2d, 3d), ImmutableList.of(1, 1, 1, 9));
@@ -268,7 +313,12 @@ public class JsonMetricsGeneratorTest {
 
   @Test
   public void testWavefrontHistogramBulkUpdateHandlesNullParams() throws IOException {
-    WavefrontHistogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), time::get);
+    WavefrontHistogram wh = WavefrontHistogram.get(testRegistry, new MetricName("test", "", "metric"), new Supplier<Long>() {
+      @Override
+      public Long get() {
+        return time.get();
+      }
+    });
 
     wh.bulkUpdate(null, ImmutableList.of(1, 5, 1));
     wh.bulkUpdate(ImmutableList.of(15d, 30d, 45d, 100d), null);
