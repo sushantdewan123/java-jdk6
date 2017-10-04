@@ -7,6 +7,7 @@
   <version>4.23-jdk6</version>
   <modules>
     <module>java-lib</module>
+    <module>java-client</module>
   </modules>
   <packaging>pom</packaging>
 
@@ -41,7 +42,6 @@
     <jetty.version>9.4.6.v20170531</jetty.version>
     <jackson.version>2.7.4</jackson.version>
     <netty.version>4.1.11.Final</netty.version>
-    <public.project.version>4.22-SNAPSHOT</public.project.version>
   </properties>
 
   <build>
@@ -77,26 +77,6 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>com.wavefront</groupId>
-        <artifactId>java-lib</artifactId>
-        <version>${public.project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.wavefront</groupId>
-        <artifactId>proxy</artifactId>
-        <version>${public.project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.wavefront</groupId>
-        <artifactId>java-client</artifactId>
-        <version>${public.project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.wavefront</groupId>
-        <artifactId>dropwizard-metrics-3.1</artifactId>
-        <version>${public.project.version}</version>
-      </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
