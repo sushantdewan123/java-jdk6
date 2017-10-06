@@ -1,6 +1,5 @@
 package com.wavefront.ingester;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 
 import java.util.List;
@@ -10,21 +9,14 @@ import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
 
-import io.netty.bootstrap.AbstractBootstrap;
-import io.netty.bootstrap.ServerBootstrap;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.LineBasedFrameDecoder;
-import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;

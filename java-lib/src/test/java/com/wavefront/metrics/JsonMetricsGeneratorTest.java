@@ -1,21 +1,26 @@
 package com.wavefront.metrics;
 
-import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 
 import com.wavefront.common.Pair;
-import com.yammer.metrics.core.*;
+import com.yammer.metrics.core.Counter;
+import com.yammer.metrics.core.Histogram;
+import com.yammer.metrics.core.Metric;
+import com.yammer.metrics.core.MetricName;
+import com.yammer.metrics.core.MetricsRegistry;
+import com.yammer.metrics.core.WavefrontHistogram;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+
+import javax.annotation.Nullable;
 
 import static com.google.common.truth.Truth.assertThat;
 

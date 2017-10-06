@@ -1,8 +1,8 @@
 package com.yammer.metrics.core;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import com.google.common.base.Supplier;
+
 import com.tdunning.math.stats.AVLTreeDigest;
 import com.tdunning.math.stats.Centroid;
 import com.tdunning.math.stats.TDigest;
@@ -22,7 +22,6 @@ import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Iterables.getLast;
 import static java.lang.Double.MAX_VALUE;
 import static java.lang.Double.MIN_VALUE;
-import static java.lang.Double.NaN;
 
 /**
  * Wavefront implementation of {@link Histogram}.
