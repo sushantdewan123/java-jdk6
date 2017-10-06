@@ -23,12 +23,11 @@ import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
+import queryserver.parser.DSWrapperLexer;
 import wavefront.report.Histogram;
 import wavefront.report.HistogramType;
 import wavefront.report.ReportPoint;
-import queryserver.parser.DSWrapperLexer;
 import wavefront.report.ReportSourceTag;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
