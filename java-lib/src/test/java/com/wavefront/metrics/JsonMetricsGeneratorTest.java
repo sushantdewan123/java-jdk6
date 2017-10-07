@@ -67,15 +67,31 @@ public class JsonMetricsGeneratorTest {
   public void testJvmMetrics() throws IOException {
     String json = generate(true, false, false, null);
     Map top = objectMapper.readValue(json, Map.class);
+    System.out.println("top : " + top);
     Map jvm = safeGet(top, "jvm", Map.class);
 
     Map memory = safeGet(jvm, "memory", Map.class);
     safeGet(memory, "totalInit", Double.class);
     safeGet(memory, "memory_pool_usages", Map.class);
 
-    Map buffers = safeGet(jvm, "buffers", Map.class);
-    safeGet(buffers, "direct", Map.class);
-    safeGet(buffers, "mapped", Map.class);
+    /**
+     * no 'buffers' for jvm metrics in JDK 1.6
+     *
+     * sample output :
+     * top : {jvm={vm={name=Java HotSpot(TM) 64-Bit Server VM, version=1.6.0_65-b14-468-11M4833},
+     * memory={totalInit=2.4317952E7, totalUsed=2.4302864E7, totalMax=2.66272768E8, totalCommitted=1.09318144E8,
+     * heapInit=0.0, heapUsed=7345112.0, heapMax=1.29957888E8, heapCommitted=8.5000192E7,
+     * heap_usage=0.056519170271526725, non_heap_usage=0.12711563110351562,
+     * memory_pool_usages={CMS Old Gen=0.0, CMS Perm Gen=0.19254907747594321,
+     * Code Cache=0.016920725504557293, Par Eden Space=0.34162845468162595,
+     * Par Survivor Space=0.8012880267518939}}, daemon_thread_count=4.0, thread_count=6.0, uptime=1.0,
+     * fd_usage=0.00810546875, current_time=1507334433622, thread-states={runnable=0.5, new=0.0, terminated=0.0,
+     * timed_waiting=0.16666666666666666, blocked=0.0, waiting=0.3333333333333333},
+     * garbage-collectors={ParNew={runs=2.0, time=4.0}, ConcurrentMarkSweep={runs=0.0, time=0.0}}}}
+     */
+    //Map buffers = safeGet(jvm, "buffers", Map.class);
+    //safeGet(buffers, "direct", Map.class);
+    //safeGet(buffers, "mapped", Map.class);
 
     safeGet(jvm, "fd_usage", Double.class);
     safeGet(jvm, "current_time", Long.class);
